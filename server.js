@@ -5,9 +5,9 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 
-// Configuración de CORS optimizada para tu plataforma web en línea y local
+// Configuración de CORS optimizada para tu plataforma web y local
 app.use(cors({
-    origin: '*', // Permite solicitudes desde cualquier cliente (frontend, móvil, web)
+    origin: '*', // Permite solicitudes desde cualquier cliente
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -25,7 +25,7 @@ mongoose.connect(MONGO_URI, {
 // Esquema de Usuario blindado
 const UserSchema = new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true }, // En un entorno totalmente productivo se encripta con bcrypt
     totalBalance: { type: Number, default: 23459.62 },
     retirableBalance: { type: Number, default: 19600.00 },
     role: { type: String, default: 'client' }, // 'client' o 'admin'
@@ -68,6 +68,7 @@ app.post('/api/login', async (req, res) => {
         if (!user) {
             return res.status(401).json({ success: false, message: 'Credenciales incorrectas.' });
         }
+        // Devolvemos los datos limpios (sin exponer información sensible innecesaria)
         res.json({ 
             success: true, 
             user: { 
@@ -85,6 +86,7 @@ app.post('/api/login', async (req, res) => {
 // 3. RUTA ADMIN: OBTENER TODOS LOS USUARIOS (Protegida)
 app.get('/api/admin/users', async (req, res) => {
     try {
+        // Aquí puedes agregar un token secreto de autorización en los headers en el futuro
         const users = await User.find().sort({ createdAt: -1 });
         res.json({ success: true, users });
     } catch (err) {
